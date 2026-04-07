@@ -1,0 +1,21 @@
+# Lo-Fi Pipeline Dependencies
+# Python 3.12+
+
+# HTTP & API
+requests>=2.31.0
+
+# Replicate (image generation)
+replicate>=0.25.0
+
+# Google / YouTube APIs
+google-api-python-client>=2.120.0
+google-auth>=2.28.0
+google-auth-httplib2>=0.2.0
+google-auth-oauthlib>=1.2.0
+
+# Config
+PyYAML>=6.0.1
+
+# Type stubs (optional, for IDE support)
+types-PyYAML>=6.0.12
+types-requests>=2.31.0

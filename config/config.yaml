@@ -1,0 +1,48 @@
+channel:
+  name: "Chill Drift"
+  tagline: "Where melodies float and time slows down"
+
+music:
+  style_prompt: "lofi hip hop, chill beats, mellow piano, vinyl crackle, soft drums, jazzy chords, warm analog, relaxing study music"
+  make_instrumental: true
+  tracks_per_mix: 18
+  track_duration_hint: 200  # saniye, Suno tam kontrol vermiyor ama prompt'a yansıt
+  crossfade_duration: 3     # saniye
+  target_mix_duration: 3600 # 1 saat
+
+image:
+  model: "black-forest-labs/flux-1.1-pro"
+  width: 1920
+  height: 1080
+  num_inference_steps: 28
+  guidance_scale: 3.5
+
+video:
+  resolution: "1920x1080"
+  fps: 30
+  crf: 20
+  preset: "medium"
+  ken_burns:
+    enabled: true
+    zoom_start: 1.0
+    zoom_end: 1.12
+  visualizer:
+    enabled: true
+    mode: "cline"          # showwaves mode
+    bar_color: "0xE8A87C"  # warm peach
+    opacity: 0.4
+    height: 80             # piksel
+  color_grade:
+    warmth: 0.03
+    contrast: 1.05
+    saturation: 0.95
+    vignette: true
+
+youtube:
+  category_id: "10"        # Music
+  privacy_status: "public"
+  default_language: "en"
+  upload_time_utc: "14:00" # izlenme pik saati
+
+schedule:
+  videos_per_day: 1

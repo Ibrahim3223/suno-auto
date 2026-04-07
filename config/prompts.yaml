@@ -1,0 +1,97 @@
+music_moods:
+  - "dreamy and mellow, floating in clouds"
+  - "rainy afternoon, cozy indoor vibes"
+  - "late night study session, calm focus"
+  - "coffee shop morning, warm sunlight"
+  - "sunset rooftop, city lights fading"
+  - "nostalgic winter evening, fireplace warmth"
+  - "spring garden breeze, gentle and peaceful"
+  - "midnight drive, neon reflections"
+  - "ocean waves at twilight, serene"
+  - "foggy forest path, mysterious calm"
+
+image_prompts:
+  - "cozy anime bedroom at night, warm lamp light, rain on window, lo-fi aesthetic, studio ghibli style, desk with headphones and coffee, plants, warm colors, detailed illustration"
+  - "anime girl studying at desk, rainy night city view from window, warm lighting, lo-fi hip hop aesthetic, cozy room with books and plants, soft purple and orange tones"
+  - "rooftop cafe at sunset, anime style, city skyline, fairy lights, coffee cup steaming, lo-fi chill aesthetic, warm golden hour, potted plants"
+  - "late night train ride, anime style, city lights through window, empty seats, warm interior lighting, lo-fi mood, peaceful"
+  - "cozy bookshop interior, rainy day outside, warm lamp light, cat sleeping on books, lo-fi aesthetic, wooden shelves, vintage feel"
+  - "japanese garden at twilight, koi pond, cherry blossoms, lanterns, peaceful anime scene, lo-fi vibes, soft pink and blue sky"
+  - "cozy cabin interior, snow falling outside window, fireplace, knitted blankets, warm drink, lo-fi winter aesthetic"
+  - "vinyl record shop, warm lighting, shelves of records, retro aesthetic, lo-fi vibe, wooden floors"
+  - "rainy city street at night, neon signs reflecting on wet pavement, anime style, lo-fi urban aesthetic"
+  - "seaside cafe at golden hour, ocean view, warm breeze, lo-fi summer vibes, anime illustration"
+
+title_templates:
+  - "🌙 {mood} Lo-Fi Beats | {scene} | 1 Hour Chill Mix"
+  - "☕ {scene} | Lo-Fi Hip Hop Radio | Beats to Study/Relax"
+  - "🎧 1 Hour {mood} Lo-Fi | {scene} | Chill Beats Mix"
+  - "🌧️ {mood} Vibes | {scene} | Lo-Fi Study Music"
+  - "✨ {scene} | {mood} Lo-Fi Beats | Relaxing Background Music"
+
+moods:
+  - "Dreamy"
+  - "Peaceful"
+  - "Mellow"
+  - "Cozy"
+  - "Gentle"
+  - "Warm"
+  - "Soft"
+  - "Moonlit"
+  - "Serene"
+  - "Hazy"
+
+scenes:
+  - "Rainy Night Study Session"
+  - "Late Night Coffee Shop"
+  - "Rooftop at Sunset"
+  - "Cozy Room Vibes"
+  - "Midnight Study Break"
+  - "Sunday Morning Calm"
+  - "Rainy Window Vibes"
+  - "Starlit Evening"
+  - "Winter Cabin Chill"
+  - "City Lights After Dark"
+
+description_template: |
+  {title}
+
+  🎵 Welcome to Chill Drift — Where melodies float and time slows down.
+
+  Perfect background music for studying, working, relaxing, or just vibing.
+
+  ☕ What you'll find here:
+  → Lo-fi hip hop beats
+  → Chill study music
+  → Relaxing ambient mixes
+  → Cozy rainy day vibes
+
+  🔔 Subscribe for daily lo-fi mixes!
+
+  📌 Timestamps:
+  {timestamps}
+
+  #lofi #chillbeats #studymusic #lofihiphop #relaxingmusic #studybeats #chillhop #lofimix
+
+  🎨 Artwork generated with AI
+  🎵 Music produced with AI assistance
+
+tags:
+  - "lofi"
+  - "lo-fi"
+  - "lofi hip hop"
+  - "chill beats"
+  - "study music"
+  - "relaxing music"
+  - "lofi radio"
+  - "beats to study to"
+  - "lofi mix"
+  - "chill mix"
+  - "1 hour lofi"
+  - "cozy beats"
+  - "rainy day music"
+  - "lofi chill"
+  - "study beats"
+  - "chillhop"
+  - "lo fi"
+  - "background music"

@@ -1,0 +1,58 @@
+name: Daily Lo-Fi Video
+
+on:
+  schedule:
+    - cron: '0 10 * * *'  # Her gün UTC 10:00 (Türkiye 13:00)
+  workflow_dispatch:        # Manuel tetikleme için
+
+jobs:
+  generate-and-upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120    # Max 2 saat (1 saatlik video encoding)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install system dependencies (FFmpeg)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version | head -1
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check available disk space
+        run: df -h /
+
+      - name: Run lo-fi pipeline
+        env:
+          SUNO_COOKIE: ${{ secrets.SUNO_COOKIE }}
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_OAUTH_TOKEN: ${{ secrets.YOUTUBE_OAUTH_TOKEN }}
+        run: python -m src.pipeline
+
+      - name: Check disk usage after pipeline
+        if: always()
+        run: df -h /
+
+      - name: Upload debug artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-output-${{ github.run_id }}
+          path: |
+            output/videos/metadata_*.json
+            output/videos/summary_*.json
+            output/videos/thumb_*.png
+          retention-days: 7
+          if-no-files-found: warn
