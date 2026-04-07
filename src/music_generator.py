@@ -1,4 +1,4 @@
-"""Suno AI music generator — unofficial cookie-based HTTP API."""
+"""Suno AI music generator — Bearer token based HTTP API."""
 
 import logging
 import os
@@ -12,9 +12,9 @@ from src.config import MUSIC_DIR, load_config, load_prompts, setup_logging
 
 logger = logging.getLogger(__name__)
 
-SUNO_BASE_URL = "https://studio-api.suno.ai"
+SUNO_BASE_URL = "https://studio-api-prod.suno.com"
 GENERATE_ENDPOINT = f"{SUNO_BASE_URL}/api/generate/v2/"
-FEED_ENDPOINT = f"{SUNO_BASE_URL}/api/feed/"
+FEED_ENDPOINT = f"{SUNO_BASE_URL}/api/feed/v3"
 
 POLL_INTERVAL_SEC = 10
 POLL_MAX_SEC = 300       # 5 dakika
@@ -22,28 +22,37 @@ REQUEST_DELAY_SEC = 5    # Rate limit
 MAX_RETRIES = 3
 
 
-def _get_cookie() -> str:
-    """Read Suno session cookie from environment variable."""
-    cookie = os.environ.get("SUNO_COOKIE", "").strip()
-    if not cookie:
+def _get_token() -> str:
+    """Read Suno Bearer token from environment variable.
+
+    Set SUNO_COOKIE to the full Authorization header value, e.g.:
+    'Bearer eyJhbGci...'
+    (copy the entire 'authorization' header value from DevTools → Network)
+    """
+    token = os.environ.get("SUNO_COOKIE", "").strip()
+    if not token:
         raise EnvironmentError(
             "SUNO_COOKIE environment variable is not set. "
-            "Log in to suno.com, open DevTools → Network, copy the Cookie header."
+            "Log in to suno.com → DevTools → Network → any studio-api-prod.suno.com request "
+            "→ Request Headers → copy the full 'authorization' header value."
         )
-    return cookie
+    # Accept both bare token and 'Bearer xxx' format
+    if not token.startswith("Bearer "):
+        token = f"Bearer {token}"
+    return token
 
 
-def _headers(cookie: str) -> dict[str, str]:
-    """Build request headers with the Suno cookie."""
+def _headers(token: str) -> dict[str, str]:
+    """Build request headers with the Suno Bearer token."""
     return {
-        "Cookie": cookie,
+        "Authorization": token,
         "Content-Type": "application/json",
         "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/122.0.0.0 Safari/537.36"
+            "Chrome/146.0.0.0 Mobile Safari/537.36"
         ),
-        "Accept": "application/json",
+        "Accept": "*/*",
         "Referer": "https://suno.com/",
         "Origin": "https://suno.com",
     }
@@ -56,7 +65,7 @@ def _build_prompt(config: dict, prompts: dict) -> str:
     return f"{style}, {mood}"
 
 
-def _generate_pair(cookie: str, prompt: str, config: dict) -> list[str]:
+def _generate_pair(token: str, prompt: str, config: dict) -> list[str]:
     """Send one generation request to Suno and return the 2 clip IDs."""
     payload = {
         "prompt": "",
@@ -67,20 +76,20 @@ def _generate_pair(cookie: str, prompt: str, config: dict) -> list[str]:
     response = requests.post(
         GENERATE_ENDPOINT,
         json=payload,
-        headers=_headers(cookie),
+        headers=_headers(token),
         timeout=60,
     )
     if response.status_code == 401:
         raise PermissionError(
-            "Suno returned 401 Unauthorized — your SUNO_COOKIE has expired. "
-            "Log in to suno.com, copy a fresh Cookie header, and update the secret."
+            "Suno returned 401 Unauthorized — your Bearer token has expired. "
+            "Log in to suno.com → DevTools → Network → copy fresh 'authorization' header → "
+            "update the SUNO_COOKIE secret."
         )
     response.raise_for_status()
     data = response.json()
 
     clips = data.get("clips", [])
     if not clips:
-        # Some API versions nest differently
         clips = data if isinstance(data, list) else []
     if len(clips) < 2:
         raise ValueError(f"Expected 2 clips from Suno, got {len(clips)}. Response: {data}")
@@ -88,21 +97,22 @@ def _generate_pair(cookie: str, prompt: str, config: dict) -> list[str]:
     return [clip["id"] for clip in clips[:2]]
 
 
-def _poll_until_complete(cookie: str, clip_ids: list[str]) -> list[dict]:
+def _poll_until_complete(token: str, clip_ids: list[str]) -> list[dict]:
     """Poll feed endpoint until all clips are complete or timeout."""
-    ids_param = ",".join(clip_ids)
     deadline = time.time() + POLL_MAX_SEC
-    logger.info("Polling for clip IDs: %s", ids_param)
+    logger.info("Polling for clip IDs: %s", clip_ids)
 
     while time.time() < deadline:
-        response = requests.get(
+        payload = {"ids": clip_ids}
+        response = requests.post(
             FEED_ENDPOINT,
-            params={"ids": ids_param},
-            headers=_headers(cookie),
+            json=payload,
+            headers=_headers(token),
             timeout=30,
         )
         response.raise_for_status()
-        clips = response.json()
+        data = response.json()
+        clips = data if isinstance(data, list) else data.get("clips", [])
 
         statuses = {c["id"]: c.get("status", "unknown") for c in clips}
         logger.debug("Clip statuses: %s", statuses)
@@ -138,7 +148,6 @@ def _download_track(audio_url: str, output_path: Path) -> None:
 def generate_tracks(count: int) -> list[Path]:
     """Generate `count` lo-fi tracks via Suno API and save them to output/music/.
 
-    Returns a list of Paths to the downloaded MP3 files.
     Each Suno request yields 2 tracks, so `count/2` requests are made
     (rounded up). Excess tracks are discarded.
 
@@ -150,7 +159,7 @@ def generate_tracks(count: int) -> list[Path]:
     """
     config = load_config()
     prompts = load_prompts()
-    cookie = _get_cookie()
+    token = _get_token()
 
     MUSIC_DIR.mkdir(parents=True, exist_ok=True)
     tracks: list[Path] = []
@@ -168,9 +177,9 @@ def generate_tracks(count: int) -> list[Path]:
 
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                clip_ids = _generate_pair(cookie, prompt, config)
+                clip_ids = _generate_pair(token, prompt, config)
                 logger.info("Clip IDs: %s", clip_ids)
-                completed_clips = _poll_until_complete(cookie, clip_ids)
+                completed_clips = _poll_until_complete(token, clip_ids)
 
                 for clip in completed_clips:
                     if len(tracks) >= count:
@@ -187,8 +196,7 @@ def generate_tracks(count: int) -> list[Path]:
 
                 break  # success — exit retry loop
 
-            except (PermissionError, TimeoutError) as e:
-                # Don't retry auth or timeout errors
+            except (PermissionError, TimeoutError):
                 raise
             except Exception as e:
                 logger.warning(
